@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Calculate the absolute difference between the head and each track
+void calculateDifference(int request[], int head, int diff[][2], int n) {
+    for (int i = 0; i < n; i++) {
+        diff[i][0] = abs(head - request[i]);
+    }
+}
+
+// Find the track with the minimum distance from the head
+int findMin(int diff[][2], int n) {
+    int index = -1;
+    int minimum = 1e9;
+    for (int i = 0; i < n; i++) {
+        if (!diff[i][1] && minimum > diff[i][0]) {
+            minimum = diff[i][0];
+            index = i;
+        }
+    }
+    return index;
+}
+
+// SSTF disk scheduling algorithm
+void shortestSeekTimeFirst(int request[], int head, int n) {
+    if (n == 0) {
+        return;
+    }
+
+    int diff[n][2];
+    for (int i = 0; i < n; i++) {
+        diff[i][0] = 0;
+        diff[i][1] = 0;
+    }
+
+    int seekCount = 0;
+    int seekSequence[n + 1];
+
+    for (int i = 0; i < n; i++) {
+        seekSequence[i] = head;
+        calculateDifference(request, head, diff, n);
+        int nextTrack = findMin(diff, n);
+        diff[nextTrack][1] = 1; // Mark the track as accessed
+        seekCount += diff[nextTrack][0];
+        head = request[nextTrack]; // Move the head to the next track
+    }
+
+    printf("Total seek count: %d\n", seekCount);
+    printf("Seek sequence: ");
+    for (int i = 0; i < n; i++) {
+        printf("%d", seekSequence[i]);
+        if (i < n - 1) {
+            printf(" -> ");
+        }
+    }
+    printf("\n");
+}
+
+int main() {
+    int n; // Number of track requests
+    printf("Enter the number of track requests: ");
+    scanf("%d", &n);
+
+    int request[n]; // Array to store track requests
+    printf("Enter the track requests: ");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &request[i]);
+    }
+
+    int initialHead; // Initial head position
+    printf("Enter the initial head position: ");
+    scanf("%d", &initialHead);
+
+    shortestSeekTimeFirst(request, initialHead, n);
+
+    return 0;
+}
